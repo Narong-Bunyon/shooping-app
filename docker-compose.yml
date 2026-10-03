@@ -1,5 +1,5 @@
-version: '3.8'
 services:
+  # 1. Laravel Application Service (PHP 8.2-FPM)
   app:
     build:
       context: .
@@ -7,12 +7,26 @@ services:
     image: laravel-app
     container_name: app
     restart: unless-stopped
+    command: php-fpm
     working_dir: /var/www
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-shoop_app}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
       - ./:/var/www
     networks:
       - app-network
+    depends_on:
+      - db
 
+  # 2. Nginx Web Server Service
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -27,15 +41,16 @@ services:
     depends_on:
       - app
 
+  # 3. MySQL 8.0 Database Service
   db:
     image: mysql:8.0
     container_name: db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE:-shoop_app}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-root}
     ports:
       - "33061:3306"
     volumes:

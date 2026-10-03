@@ -1,0 +1,66 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+// Variables
+$font-family-sans-serif: 'Inter', sans-serif;
+$primary: #4f46e5; // Indigo
+$secondary: #64748b;
+$success: #10b981;
+$info: #0ea5e9;
+$warning: #f59e0b;
+$danger: #ef4444;
+$light: #f8fafc;
+$dark: #0f172a;
+$body-bg: #f1f5f9;
+$body-color: #334155;
+$border-radius: 0.75rem;
+$card-border-radius: 1rem;
+$btn-border-radius: 0.5rem;
+
+// Bootstrap
+@import 'bootstrap/scss/bootstrap';
+
+// Custom Premium Styling
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+}
+
+.btn {
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 0.5rem 1.25rem;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+.alert {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}

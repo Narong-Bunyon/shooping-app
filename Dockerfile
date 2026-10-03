@@ -28,11 +28,15 @@ WORKDIR /var/www
 # Copy application files into container
 COPY . /var/www
 
-# Install PHP composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Install NPM dependencies and build Vite assets for production
-RUN npm install && npm run build
+# Install PHP composer dependencies during build
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader || true
+
+# Install NPM dependencies and build Vite assets
+RUN npm install && npm run build || true
 
 # Set permissions for storage & bootstrap cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
@@ -40,4 +44,5 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
 
 EXPOSE 9000
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php-fpm"]

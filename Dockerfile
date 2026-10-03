@@ -1,9 +1,6 @@
-# ==========================================
-# 1. Base PHP Image with System Dependencies
-# ==========================================
 FROM php:8.2-fpm
 
-# Install system dependencies & Node.js (for Vite asset compilation)
+# Install system dependencies & Node.js for building frontend assets
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,33 +13,31 @@ RUN apt-get update && apt-get install -y \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
-# Clear package cache
+# Clear apt package cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install required PHP extensions for Laravel & MySQL
+# Install PHP extensions required by Laravel & MySQL
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Install latest Composer executable
+# Get latest Composer binary
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set container working directory
+# Set working directory inside container
 WORKDIR /var/www
 
-# Copy existing application directory
+# Copy application files into container
 COPY . /var/www
 
-# Install PHP dependencies
+# Install PHP composer dependencies
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Install Node dependencies and compile production assets with Vite
+# Install NPM dependencies and build Vite assets for production
 RUN npm install && npm run build
 
-# Fix ownership & permissions for Laravel storage and cache directories
+# Set permissions for storage & bootstrap cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Expose port 8000 for standalone PHP server mode
-EXPOSE 8000
+EXPOSE 9000
 
-# Default command: Runs PHP Artisan Server (can be overridden by Docker Compose / Nginx)
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php-fpm"]

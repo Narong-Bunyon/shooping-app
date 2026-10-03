@@ -28,9 +28,10 @@ WORKDIR /var/www
 # Copy application files into container
 COPY . /var/www
 
-# Copy entrypoint script
+# Copy entrypoint script and convert Windows CRLF line endings to Linux LF
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Install PHP composer dependencies during build
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader || true

@@ -1,48 +1,43 @@
 FROM php:8.2-fpm
 
-# Set working directory inside container
+# Set working directory
 WORKDIR /var/www
 
-# Install system dependencies & Node.js for building frontend assets
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
     unzip \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    nodejs \
+    npm
 
-# Install PHP extensions required by Laravel & MySQL
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Get latest Composer binary
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files into container
+# Copy existing application directory contents
 COPY . /var/www
 
-# Copy entrypoint script and convert Windows CRLF line endings to Linux LF
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh
+# Ensure entrypoint is executable
+RUN chmod +x /var/www/docker-entrypoint.sh
 
-# Install PHP composer dependencies for production
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-
-# Install NPM dependencies and build Vite assets
-RUN npm install && npm run build
-
-# Set permissions for storage & bootstrap cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Assign permissions
+RUN chown -R www-data:www-data /var/www
 
 EXPOSE 9000
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["sh", "/var/www/docker-entrypoint.sh"]
+
 CMD ["php-fpm"]
